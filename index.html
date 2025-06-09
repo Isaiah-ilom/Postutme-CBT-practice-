@@ -6,7 +6,6 @@
     <title>🎓 POST UTME CBT - University of Ibadan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Glitch Animation for Loading Page */
         @keyframes glitch {
             0% { transform: translate(0); }
             20% { transform: translate(-2px, 2px); }
@@ -18,7 +17,6 @@
         .glitch {
             animation: glitch 0.3s infinite;
         }
-        /* Confetti Animation */
         @keyframes confetti {
             0% { transform: translateY(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
@@ -30,6 +28,35 @@
             background: #f00;
             animation: confetti 3s ease-in-out infinite;
         }
+        #calculatorModal .modal-content {
+            background: #1f2937;
+            color: white;
+            max-width: 400px;
+            width: 100%;
+        }
+        #calculatorDisplay {
+            background: #374151;
+            padding: 10px;
+            font-size: 1.5rem;
+            text-align: right;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+        .calculator-grid button {
+            padding: 10px;
+            background: #4b5563;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .calculator-grid button:hover {
+            background: #6b7280;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
@@ -40,7 +67,7 @@
         <p class="text-lg mt-2">Loading Practice Platform...</p>
     </div>
 
-    <!-- Main App Container (Hidden Initially) -->
+    <!-- Main App Container -->
     <div id="appContainer" class="hidden flex flex-col min-h-screen">
         <!-- Header -->
         <header class="bg-gray-800 p-4 flex justify-between items-center">
@@ -64,6 +91,40 @@
                     <input id="avatarInput" type="file" accept="image/*" class="w-full p-2 mb-4 bg-gray-700 rounded text-white">
                     <img id="avatarPreview" class="w-20 h-20 rounded-full object-cover mb-4 mx-auto" src="https://via.placeholder.com/40" alt="Avatar Preview">
                     <button id="authBtn" class="w-full bg-blue-600 p-2 rounded hover:bg-blue-700">Continue</button>
+                </div>
+            </div>
+
+            <!-- Calculator Modal -->
+            <div id="calculatorModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-40 hidden">
+                <div class="modal-content p-6 rounded-lg">
+                    <h2 class="text-2xl font-bold mb-4">Scientific Calculator</h2>
+                    <div id="calculatorDisplay" class="w-full">0</div>
+                    <div class="calculator-grid">
+                        <button onclick="app.calculatorInput('7')">7</button>
+                        <button onclick="app.calculatorInput('8')">8</button>
+                        <button onclick="app.calculatorInput('9')">9</button>
+                        <button onclick="app.calculatorInput('/')">/</button>
+                        <button onclick="app.calculatorInput('4')">4</button>
+                        <button onclick="app.calculatorInput('5')">5</button>
+                        <button onclick="app.calculatorInput('6')">6</button>
+                        <button onclick="app.calculatorInput('*')">×</button>
+                        <button onclick="app.calculatorInput('1')">1</button>
+                        <button onclick="app.calculatorInput('2')">2</button>
+                        <button onclick="app.calculatorInput('3')">3</button>
+                        <button onclick="app.calculatorInput('-')">-</button>
+                        <button onclick="app.calculatorInput('0')">0</button>
+                        <button onclick="app.calculatorInput('.')">.</button>
+                        <button onclick="app.calculatorClear()">C</button>
+                        <button onclick="app.calculatorInput('+')">+</button>
+                        <button onclick="app.calculatorEvaluate()">=</button>
+                        <button onclick="app.calculatorFunction('sqrt')">√</button>
+                        <button onclick="app.calculatorFunction('pow')">x²</button>
+                        <button onclick="app.calculatorFunction('sin')">sin</button>
+                        <button onclick="app.calculatorFunction('cos')">cos</button>
+                        <button onclick="app.calculatorFunction('tan')">tan</button>
+                        <button onclick="app.calculatorFunction('quad')">Quad</button>
+                        <button onclick="app.closeCalculator()">Close</button>
+                    </div>
                 </div>
             </div>
 
@@ -93,7 +154,10 @@
                         <button class="study-plan-btn bg-purple-600 p-4 rounded hover:bg-purple-700 transition transform hover:scale-105 flex items-center space-x-2" data-subject="Literature"><span>📚</span><span>Literature Study Plan</span></button>
                     </div>
                 </div>
-                <button id="showLeaderboard" class="mt-6 bg-green-600 px-4 py-2 rounded hover:bg-green-700">View Leaderboard</button>
+                <div class="mt-6 flex space-x-4">
+                    <button id="showLeaderboard" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">View Leaderboard</button>
+                    <button id="showWikiSearch" class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700">Wikipedia Search</button>
+                </div>
             </div>
 
             <!-- Quiz Section -->
@@ -112,6 +176,7 @@
                     <button id="prevBtn" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">Previous</button>
                     <button id="submitBtn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700" disabled>Submit</button>
                     <button id="nextBtn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 hidden">Next</button>
+                    <button id="openCalculator" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 hidden">Calculator</button>
                 </div>
                 <div id="explanationContainer" class="mt-6 bg-gray-800 p-4 rounded hidden">
                     <p id="explanationText" class="text-sm whitespace-pre-wrap"></p>
@@ -133,12 +198,10 @@
                     <h2 class="text-3xl font-bold">📚 Study Plan - <span id="studySubjectTitle"></span></h2>
                     <button id="backToDashboardStudy" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">← Back to Dashboard</button>
                 </div>
-                <!-- Topic Selection -->
                 <div id="topicSelection" class="mb-6">
                     <h3 class="text-xl font-bold mb-4">Select a Topic to Study:</h3>
                     <div id="topicsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
                 </div>
-                <!-- Study Content -->
                 <div id="studyContent" class="hidden">
                     <div class="bg-gray-800 rounded-lg p-6 mb-6">
                         <div class="flex justify-between items-center mb-4">
@@ -147,16 +210,15 @@
                                 <button id="regenerateStudyPlan" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">🔄 Regenerate</button>
                                 <button id="toggleStudyPlanAI" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700">Switch to Static</button>
                                 <button id="startTopicQuiz" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">📝 Take Quiz</button>
+                                <button id="openCalculatorStudy" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 hidden">Calculator</button>
                             </div>
                         </div>
-                        <!-- Study Plan Content -->
                         <div id="studyPlanContent" class="prose prose-invert max-w-none">
                             <div class="flex items-center justify-center py-8">
                                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                                 <span class="ml-2">Generating comprehensive study plan...</span>
                             </div>
                         </div>
-                        <!-- Study Progress -->
                         <div class="mt-6 p-4 bg-gray-700 rounded">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="font-semibold">Study Progress</span>
@@ -172,6 +234,22 @@
                         <button id="backToTopics" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">← Back to Topics</button>
                         <button id="goToStudy" class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700">📚 Go to Study</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Wikipedia Search Section -->
+            <div id="wikiSection" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">🌐 Wikipedia Search</h2>
+                    <button id="backToDashboardWiki" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">← Back to Dashboard</button>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold mb-4">Search Wikipedia for More Information</h3>
+                    <div class="flex space-x-2">
+                        <input id="wikiSearchInput" type="text" placeholder="Search Wikipedia (e.g., Algebra, Cell Biology)" class="w-full p-2 bg-gray-700 rounded text-white">
+                        <button id="wikiSearchBtn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Search</button>
+                    </div>
+                    <div id="wikiResults" class="mt-4 prose prose-invert max-w-none"></div>
                 </div>
             </div>
 
@@ -209,12 +287,16 @@
                 this.selectedAnswer = null;
                 this.sessionData = [];
                 this.timer = null;
-                this.useGemini = false; // Default to GPT (false means use GPT or static)
+                this.useGemini = false;
                 this.currentTopic = null;
                 this.currentStudySubject = null;
-                this.studiedTopics = JSON.parse(localStorage.getItem('studiedTopics') || '{}');
+                this.studiedTopics = this.getLocalStorage('studiedTopics', {});
                 this.isTopicBasedQuiz = false;
                 this.currentTopicContext = null;
+                this.calculatorState = { expression: '', result: 0 };
+                this.wikiCache = this.getLocalStorage('wikiCache', {});
+                this.lastWikiRequestTime = 0;
+                this.minRequestInterval = 1000;
 
                 // DOM Elements
                 this.loadingPage = document.getElementById('loadingPage');
@@ -265,6 +347,16 @@
                 this.toggleStudyPlanAI = document.getElementById('toggleStudyPlanAI');
                 this.startTopicQuiz = document.getElementById('startTopicQuiz');
                 this.markAsStudied = document.getElementById('markAsStudied');
+                this.wikiSection = document.getElementById('wikiSection');
+                this.wikiSearchInput = document.getElementById('wikiSearchInput');
+                this.wikiSearchBtn = document.getElementById('wikiSearchBtn');
+                this.wikiResults = document.getElementById('wikiResults');
+                this.showWikiSearch = document.getElementById('showWikiSearch');
+                this.backToDashboardWiki = document.getElementById('backToDashboardWiki');
+                this.calculatorModal = document.getElementById('calculatorModal');
+                this.calculatorDisplay = document.getElementById('calculatorDisplay');
+                this.openCalculator = document.getElementById('openCalculator');
+                this.openCalculatorStudy = document.getElementById('openCalculatorStudy');
 
                 // Event Listeners
                 this.authBtn.addEventListener('click', () => this.handleAuth());
@@ -285,6 +377,12 @@
                 this.toggleStudyPlanAI.addEventListener('click', () => this.toggleStudyPlanAI());
                 this.startTopicQuiz.addEventListener('click', () => this.startTopicBasedQuiz());
                 this.markAsStudied.addEventListener('click', () => this.markTopicAsStudied());
+                this.wikiSearchBtn.addEventListener('click', () => this.searchWikipedia());
+                this.wikiSearchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.searchWikipedia(); });
+                this.showWikiSearch.addEventListener('click', () => this.showWikiSection());
+                this.backToDashboardWiki.addEventListener('click', () => this.showDashboard());
+                this.openCalculator.addEventListener('click', () => this.showCalculator());
+                this.openCalculatorStudy.addEventListener('click', () => this.showCalculator());
                 document.querySelectorAll('.subject-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.startQuiz(btn.dataset.subject));
                 });
@@ -296,40 +394,77 @@
                 this.init();
             }
 
-            init() {
-                console.log('Initializing app...');
+            // Safely retrieve and parse localStorage data
+            getLocalStorage(key, defaultValue) {
                 try {
-                    setTimeout(() => {
-                        console.log('Hiding loading page...');
-                        this.loadingPage.classList.add('hidden');
-                        this.appContainer.classList.remove('hidden');
-                        const profile = JSON.parse(localStorage.getItem('profile') || '{}');
-                        if (profile && profile.nickname) {
-                            console.log('Profile found:', profile.nickname);
-                            this.profileName.textContent = profile.nickname;
-                            this.welcomeName.textContent = profile.nickname;
-                            this.profileAvatar.src = profile.avatar || 'https://via.placeholder.com/40';
-                            this.showDashboard();
-                        } else {
-                            console.log('No profile found, showing auth modal...');
-                            this.authModal.classList.remove('hidden');
-                        }
-                    }, 2000);
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : defaultValue;
                 } catch (error) {
-                    console.error('Error during initialization:', error);
-                    alert('Failed to initialize the app. Please refresh the page.');
+                    console.error(`Error parsing ${key} from localStorage:`, error);
+                    return defaultValue;
+                }
+            }
+
+            // Safely save to localStorage
+            setLocalStorage(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (error) {
+                    console.error(`Error saving ${key} to localStorage:`, error);
+                }
+            }
+
+            async init() {
+                // Failsafe timeout to hide loading screen after 3 seconds
+                const failsafeTimeout = setTimeout(() => {
+                    console.warn('Failsafe triggered: Hiding loading screen');
+                    this.loadingPage.classList.add('hidden');
+                    this.appContainer.classList.remove('hidden');
+                    this.authModal.classList.remove('hidden');
+                }, 3000);
+
+                try {
+                    // Get profile from localStorage safely
+                    const profile = this.getLocalStorage('profile', null);
+
+                    // Minimal delay to ensure smooth UI transition
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Clear failsafe timeout since initialization succeeded
+                    clearTimeout(failsafeTimeout);
+
+                    // Hide loading page and show app
+                    this.loadingPage.classList.add('hidden');
+                    this.appContainer.classList.remove('hidden');
+
+                    // Show dashboard if logged in, otherwise show auth modal
+                    if (profile && profile.nickname) {
+                        this.profileName.textContent = profile.nickname;
+                        this.welcomeName.textContent = profile.nickname;
+                        this.profileAvatar.src = profile.avatar || 'https://via.placeholder.com/40';
+                        this.showDashboard();
+                    } else {
+                        this.authModal.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    clearTimeout(failsafeTimeout);
+                    this.loadingPage.classList.add('hidden');
+                    this.appContainer.classList.remove('hidden');
+                    this.authModal.classList.remove('hidden');
+                    this.showError('Failed to initialize the app. Please refresh the page.');
                 }
             }
 
             handleAuth() {
                 const nickname = this.nicknameInput.value.trim();
                 if (!nickname) {
-                    alert('Please enter a nickname');
+                    this.showError('Please enter a nickname');
                     return;
                 }
                 const avatar = this.avatarPreview.src;
                 const profile = { nickname, avatar };
-                localStorage.setItem('profile', JSON.stringify(profile));
+                this.setLocalStorage('profile', profile);
                 this.profileName.textContent = nickname;
                 this.welcomeName.textContent = nickname;
                 this.profileAvatar.src = avatar;
@@ -341,36 +476,46 @@
                 const file = this.avatarInput.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = () => {
-                        this.avatarPreview.src = reader.result;
-                    };
+                    reader.onload = () => this.avatarPreview.src = reader.result;
                     reader.readAsDataURL(file);
                 }
             }
 
             logout() {
                 localStorage.removeItem('profile');
+                localStorage.removeItem('studiedTopics');
+                localStorage.removeItem('wikiCache');
                 this.authModal.classList.remove('hidden');
-                this.dashboard.classList.add('hidden');
-                this.quizSection.classList.add('hidden');
-                this.leaderboardSection.classList.add('hidden');
-                this.studyPlanSection.classList.add('hidden');
+                this.hideAllSections();
                 this.nicknameInput.value = '';
                 this.avatarPreview.src = 'https://via.placeholder.com/40';
             }
 
-            showDashboard() {
-                this.dashboard.classList.remove('hidden');
+            hideAllSections() {
+                this.dashboard.classList.add('hidden');
                 this.quizSection.classList.add('hidden');
                 this.reviewSection.classList.add('hidden');
                 this.leaderboardSection.classList.add('hidden');
                 this.studyPlanSection.classList.add('hidden');
+                this.wikiSection.classList.add('hidden');
+                this.calculatorModal.classList.add('hidden');
+            }
+
+            showDashboard() {
+                this.hideAllSections();
+                this.dashboard.classList.remove('hidden');
+            }
+
+            showWikiSection() {
+                this.hideAllSections();
+                this.wikiSection.classList.remove('hidden');
+                this.wikiSearchInput.value = '';
+                this.wikiResults.innerHTML = '';
             }
 
             showLeaderboardSection() {
-                this.dashboard.classList.add('hidden');
+                this.hideAllSections();
                 this.leaderboardSection.classList.remove('hidden');
-                this.studyPlanSection.classList.add('hidden');
             }
 
             async startQuiz(subject) {
@@ -380,70 +525,60 @@
                 this.sessionData = [];
                 this.isTopicBasedQuiz = false;
                 this.currentTopicContext = null;
-                this.dashboard.classList.add('hidden');
+                this.hideAllSections();
                 this.quizSection.classList.remove('hidden');
                 this.loadingPage.classList.remove('hidden');
-                await this.loadQuestion();
-                this.loadingPage.classList.add('hidden');
+                try {
+                    await this.loadQuestion();
+                    this.loadingPage.classList.add('hidden');
+                } catch (error) {
+                    console.error('Quiz start error:', error);
+                    this.showError('Failed to start quiz. Please try again.');
+                    this.loadingPage.classList.add('hidden');
+                    this.showDashboard();
+                }
             }
 
             async loadQuestion() {
                 try {
-                    let url = `https://questions.aloc.com.ng/api/v2/q?subject=${this.currentSubject}`;
-                    if (this.isTopicBasedQuiz && this.currentTopicContext) {
-                        url += `&topic=${encodeURIComponent(this.currentTopicContext)}`;
-                    }
-                    const response = await fetch(url, {
+                    const url = this.isTopicBasedQuiz && this.currentTopicContext
+                        ? `https://questions.aloc.com.ng/api/v2/q?subject=${this.currentSubject}&topic=${encodeURIComponent(this.currentTopicContext)}`
+                        : `https://questions.aloc.com.ng/api/v2/q?subject=${this.currentSubject}`;
+                    const response = await this.fetchWithTimeout(url, {
                         headers: {
                             'Accept': 'application/json',
                             'AccessToken': 'QB-139d5195a490b3c12794'
                         }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch question');
-                    }
-
+                    }, 10000);
                     const data = await response.json();
+                    if (!data.data) throw new Error('No question data received');
                     this.currentQuestion = data.data;
-                    console.log('Loaded question:', this.currentQuestion);
                     this.displayQuestion();
                     this.startTimer();
                 } catch (error) {
                     console.error('Error loading question:', error);
-                    alert('Failed to load question. Please try again.');
-                    this.showDashboard();
+                    throw new Error('Failed to load question');
                 }
             }
 
             displayQuestion() {
                 this.questionCounter.textContent = `Question ${this.currentQuestionIndex + 1} of ${this.totalQuestions}`;
                 this.questionText.textContent = this.currentQuestion.question || 'Question text not available';
-
-                const progress = ((this.currentQuestionIndex) / this.totalQuestions) * 100;
-                this.progressFill.style.width = `${progress}%`;
-
-                if (this.currentQuestion.image) {
-                    this.questionImage.src = this.currentQuestion.image;
-                    this.questionImage.classList.remove('hidden');
-                } else {
-                    this.questionImage.classList.add('hidden');
-                }
-
+                this.progressFill.style.width = `${(this.currentQuestionIndex / this.totalQuestions) * 100}%`;
+                this.questionImage.src = this.currentQuestion.image || '';
+                this.questionImage.classList.toggle('hidden', !this.currentQuestion.image);
                 this.selectedAnswer = null;
                 this.submitBtn.disabled = true;
                 this.submitBtn.classList.remove('hidden');
                 this.nextBtn.classList.add('hidden');
                 this.explanationContainer.classList.add('hidden');
-
                 this.optionsContainer.innerHTML = '';
                 this.displayOptions();
+                this.openCalculator.classList.toggle('hidden', !['Mathematics', 'Physics', 'Chemistry'].includes(this.currentSubject));
             }
 
             displayOptions() {
                 const options = ['a', 'b', 'c', 'd'];
-                this.optionsContainer.innerHTML = '';
-
                 options.forEach(option => {
                     const button = document.createElement('button');
                     button.className = 'option-button bg-gray-700 p-4 rounded hover:bg-gray-600 w-full text-left';
@@ -458,24 +593,20 @@
             }
 
             selectOption(option, buttonElement) {
-                console.log('Option clicked:', option);
-                document.querySelectorAll('.option-button').forEach(btn => {
-                    btn.classList.remove('bg-blue-600');
-                });
+                document.querySelectorAll('.option-button').forEach(btn => btn.classList.remove('bg-blue-600'));
                 buttonElement.classList.add('bg-blue-600');
                 this.selectedAnswer = option;
                 this.submitBtn.disabled = false;
             }
 
             startTimer() {
+                clearInterval(this.timer);
                 this.timeRemaining = 30;
                 this.updateTimerDisplay();
                 this.timer = setInterval(() => {
                     this.timeRemaining--;
                     this.updateTimerDisplay();
-                    if (this.timeRemaining <= 0) {
-                        this.timeUp();
-                    }
+                    if (this.timeRemaining <= 0) this.timeUp();
                 }, 1000);
             }
 
@@ -499,17 +630,13 @@
             async submitAnswer() {
                 clearInterval(this.timer);
                 const isCorrect = this.selectedAnswer === this.currentQuestion.answer;
-                if (isCorrect) {
-                    this.score++;
-                }
-
+                if (isCorrect) this.score++;
                 this.sessionData.push({
                     question: this.currentQuestion,
                     userAnswer: this.selectedAnswer,
                     correct: isCorrect,
                     timeSpent: 30 - this.timeRemaining
                 });
-
                 this.showCorrectAnswer();
                 await this.showExplanation();
                 this.nextBtn.classList.remove('hidden');
@@ -518,11 +645,8 @@
 
             showCorrectAnswer() {
                 document.querySelectorAll('.option-button').forEach(btn => {
-                    if (btn.dataset.option === this.currentQuestion.answer) {
-                        btn.classList.add('bg-green-600');
-                    } else if (btn.dataset.option === this.selectedAnswer && !this.sessionData[this.currentQuestionIndex].correct) {
-                        btn.classList.add('bg-red-600');
-                    }
+                    btn.classList.toggle('bg-green-600', btn.dataset.option === this.currentQuestion.answer);
+                    btn.classList.toggle('bg-red-600', btn.dataset.option === this.selectedAnswer && !this.sessionData[this.currentQuestionIndex].correct);
                 });
             }
 
@@ -535,11 +659,10 @@
             }
 
             async showExplanation() {
+                this.explanationText.textContent = 'Generating AI explanation...';
+                this.explanationContainer.classList.remove('hidden');
                 try {
-                    this.explanationText.textContent = 'Generating AI explanation...';
-                    this.explanationContainer.classList.remove('hidden');
-
-                    const prompt = `You are an expert tutor for the University of Ibadan POST UTME CBT. Provide a detailed, educational explanation for the following ${this.currentSubject} question, suitable for a student preparing for the exam. Include why the correct answer is right, why other options are incorrect, and address common misconceptions. Keep the tone clear, concise, and engaging. Do not use markdown formatting (e.g., **, *, #) in your response.
+                    const prompt = `You are an expert tutor for the University of Ibadan POST UTME CBT. Provide a detailed, educational explanation for the following ${this.currentSubject} question, suitable for a student preparing for the exam. Include why the correct answer is right, why other options are incorrect, and address common misconceptions. Keep the tone clear, concise, and engaging. Do not use markdown formatting.
 
 Question: "${this.currentQuestion.question}"
 Options:
@@ -550,31 +673,18 @@ D) ${this.currentQuestion.option.d || 'N/A'}
 Correct Answer: ${this.currentQuestion.answer}
 Student's Answer: ${this.selectedAnswer || 'No answer selected'}
 
-Explanation should be 150-300 words, structured with an introduction, explanation of the correct answer, analysis of incorrect options, and a summary of key takeaways. After the explanation, explicitly state: "Correct Answer: [answer]".`;
-
-                    let response;
-                    if (this.useGemini) {
-                        response = await fetch(`https://kaiz-apis.gleeze.com/api/gpt-4.1?ask=${encodeURIComponent(prompt)}&uid=1268&apikey=a0ebe80e-bf1a-4dbf-8d36-6935b1bfa5ea`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        if (!response.ok) throw new Error('GPT API failed');
-                        const data = await response.json();
-                        const rawText = data.response || 'No explanation provided by GPT API.';
-                        this.explanationText.textContent = this.cleanAIResponse(rawText) + `\n\nCorrect Answer: ${this.currentQuestion.answer}`;
-                    } else {
-                        response = await fetch(`https://kaiz-apis.gleeze.com/api/gpt-4.1?ask=${encodeURIComponent(prompt)}&uid=1268&apikey=a0ebe80e-bf1a-4dbf-8d36-6935b1bfa5ea`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        if (!response.ok) throw new Error('GPT API failed');
-                        const data = await response.json();
-                        const rawText = data.response || 'No explanation provided by GPT API.';
-                        this.explanationText.textContent = this.cleanAIResponse(rawText) + `\n\nCorrect Answer: ${this.currentQuestion.answer}`;
-                    }
+Explanation should be 150-300 words, structured with an introduction, explanation of the correct answer, analysis of incorrect options, and a summary of key takeaways. After the explanation, state: "Correct Answer: [answer]".`;
+                    const response = await this.fetchWithTimeout(
+                        `https://kaiz-apis.gleeze.com/api/gpt-4.1?ask=${encodeURIComponent(prompt)}&uid=1268&apikey=a0ebe80e-bf1a-4dbf-8d36-6935b1bfa5ea`,
+                        { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+                        10000
+                    );
+                    const data = await response.json();
+                    const rawText = data.response || 'No explanation provided by GPT API.';
+                    this.explanationText.textContent = this.cleanAIResponse(rawText) + `\n\nCorrect Answer: ${this.currentQuestion.answer}`;
                 } catch (error) {
                     console.error('Error getting explanation:', error);
-                    this.explanationText.textContent = `Explanation: The correct answer is based on key concepts in ${this.currentSubject}. Please review your study materials for a detailed understanding of this topic.\n\nCorrect Answer: ${this.currentQuestion.answer}`;
+                    this.explanationText.textContent = `Explanation: The correct answer is based on key concepts in ${this.currentSubject}. Please review your study materials or use the Wikipedia Search for a detailed understanding.\n\nCorrect Answer: ${this.currentQuestion.answer}`;
                 }
             }
 
@@ -605,11 +715,11 @@ Explanation should be 150-300 words, structured with an introduction, explanatio
             }
 
             endQuiz() {
-                this.quizSection.classList.add('hidden');
+                this.hideAllSections();
                 this.reviewSection.classList.remove('hidden');
                 this.showReview();
                 this.showConfetti();
-                localStorage.setItem('quizResults', JSON.stringify(this.sessionData));
+                this.setLocalStorage('quizResults', this.sessionData);
             }
 
             showReview() {
@@ -690,12 +800,10 @@ Explanation should be 150-300 words, structured with an introduction, explanatio
             showStudyPlan(subject) {
                 this.currentStudySubject = subject;
                 this.studySubjectTitle.textContent = subject;
-                this.dashboard.classList.add('hidden');
-                this.quizSection.classList.add('hidden');
-                this.reviewSection.classList.add('hidden');
-                this.leaderboardSection.classList.add('hidden');
+                this.hideAllSections();
                 this.studyPlanSection.classList.remove('hidden');
                 this.showTopicSelection();
+                this.openCalculatorStudy.classList.toggle('hidden', !['Mathematics', 'Physics', 'Chemistry'].includes(subject));
             }
 
             showTopicSelection() {
@@ -707,7 +815,6 @@ Explanation should be 150-300 words, structured with an introduction, explanatio
             loadTopics() {
                 this.topicsContainer.innerHTML = '';
                 const topics = this.getSubjectTopics(this.currentStudySubject);
-                
                 topics.forEach(topic => {
                     const button = document.createElement('button');
                     const isStudied = this.studiedTopics[this.currentStudySubject]?.includes(topic);
@@ -739,16 +846,13 @@ Explanation should be 150-300 words, structured with an introduction, explanatio
                 this.studyPlanContent.innerHTML = `
                     <div class="flex items-center justify-center py-8">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        <span class="ml-2">Generating comprehensive study plan for ${topic} using ${this.useGemini ? 'Static Content' : 'GPT'}...</span>
+                        <span class="ml-2">Generating comprehensive study plan for ${topic}...</span>
                     </div>
                 `;
-
                 try {
-                    console.log(`Attempting to generate study plan for ${topic} using ${this.useGemini ? 'Static Content' : 'GPT'} (Attempt ${retryCount + 1}/${maxRetries + 1})`);
                     let studyPlan;
-
                     if (!this.useGemini) {
-                        const prompt = `You are an expert tutor for the University of Ibadan POST UTME examination. Create a comprehensive, textbook-style study guide for the topic "${topic}" in ${this.currentStudySubject}, designed to prepare students for the POST UTME. The content should be self-contained, covering everything a student needs to know, similar to a textbook chapter. Use clear, educational language and avoid markdown formatting (e.g., **, *, #).
+                        const prompt = `You are an expert tutor for the University of Ibadan POST UTME examination. Create a comprehensive, textbook-style study guide for the topic "${topic}" in ${this.currentStudySubject}, designed to prepare students for the POST UTME. The content should be self-contained, covering everything a student needs to know, similar to a textbook chapter. Use clear, educational language and avoid markdown formatting.
 
 Structure the response as follows:
 1. INTRODUCTION: Explain the topic's importance in the POST UTME and its relevance to ${this.currentStudySubject}.
@@ -760,25 +864,16 @@ Structure the response as follows:
 7. SUMMARY: Summarize the key points for quick revision.
 
 The content should be 600-800 words, engaging, and tailored to the University of Ibadan POST UTME standards. Use headings and bullet points for clarity.`;
-
-                        const response = await fetch(`https://kaiz-apis.gleeze.com/api/gpt-4.1?ask=${encodeURIComponent(prompt)}&uid=1268&apikey=a0ebe80e-bf1a-4dbf-8d36-6935b1bfa5ea`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            throw new Error(`GPT API failed - HTTP ${response.status}: ${errorText}`);
-                        }
-
+                        const response = await this.fetchWithTimeout(
+                            `https://kaiz-apis.gleeze.com/api/gpt-4.1?ask=${encodeURIComponent(prompt)}&uid=1268&apikey=a0ebe80e-bf1a-4dbf-8d36-6935b1bfa5ea`,
+                            { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+                            15000
+                        );
                         const data = await response.json();
                         studyPlan = data.response || 'No study plan provided by GPT API.';
                     } else {
                         studyPlan = this.getFallbackStudyPlan(this.currentStudySubject, topic);
                     }
-
-                    console.log('Study plan generated successfully:', studyPlan.substring(0, 100) + '...');
-
                     this.studyPlanContent.innerHTML = `
                         <div class="prose prose-invert max-w-none">
                             <div class="whitespace-pre-line leading-relaxed text-gray-100">
@@ -787,15 +882,11 @@ The content should be 600-800 words, engaging, and tailored to the University of
                         </div>
                     `;
                 } catch (error) {
-                    console.error(`Error generating study plan with ${this.useGemini ? 'Static Content' : 'GPT'} (Attempt ${retryCount + 1}):`, error);
-
+                    console.error(`Error generating study plan (Attempt ${retryCount + 1}):`, error);
                     if (!this.useGemini && retryCount < maxRetries) {
-                        console.log(`Retrying with GPT... (${retryCount + 1}/${maxRetries})`);
                         setTimeout(() => this.generateStudyPlan(topic, retryCount + 1, maxRetries), 1000);
                         return;
                     }
-
-                    console.warn('Max retries reached or static mode, falling back to static content.');
                     const fallbackPlan = this.getFallbackStudyPlan(this.currentStudySubject, topic);
                     this.studyPlanContent.innerHTML = `
                         <div class="prose prose-invert max-w-none">
@@ -815,7 +906,6 @@ The content should be 600-800 words, engaging, and tailored to the University of
             toggleStudyPlanAI() {
                 this.useGemini = !this.useGemini;
                 this.toggleStudyPlanAI.textContent = `Switch to ${this.useGemini ? 'Static' : 'GPT'}`;
-                console.log(`Switched study plan source to ${this.useGemini ? 'Static' : 'GPT'}`);
                 this.generateStudyPlan(this.currentTopic);
             }
 
@@ -913,11 +1003,9 @@ SUMMARY
                 if (!this.studiedTopics[this.currentStudySubject]) {
                     this.studiedTopics[this.currentStudySubject] = [];
                 }
-                
                 const totalTopics = this.getSubjectTopics(this.currentStudySubject).length;
                 const studiedCount = this.studiedTopics[this.currentStudySubject].length;
                 const percentage = Math.round((studiedCount / totalTopics) * 100);
-                
                 this.studyProgress.textContent = `${percentage}%`;
                 this.studyProgressBar.style.width = `${percentage}%`;
             }
@@ -926,12 +1014,10 @@ SUMMARY
                 if (!this.studiedTopics[this.currentStudySubject]) {
                     this.studiedTopics[this.currentStudySubject] = [];
                 }
-                
                 if (!this.studiedTopics[this.currentStudySubject].includes(this.currentTopic)) {
                     this.studiedTopics[this.currentStudySubject].push(this.currentTopic);
-                    localStorage.setItem('studiedTopics', JSON.stringify(this.studiedTopics));
+                    this.setLocalStorage('studiedTopics', this.studiedTopics);
                     this.updateStudyProgress();
-                    
                     const button = this.markAsStudied;
                     const originalText = button.textContent;
                     button.textContent = '✓ Marked as Studied!';
@@ -951,17 +1037,211 @@ SUMMARY
                 this.totalQuestions = 5;
                 this.isTopicBasedQuiz = true;
                 this.currentTopicContext = this.currentTopic;
-                
-                this.studyPlanSection.classList.add('hidden');
+                this.hideAllSections();
                 this.quizSection.classList.remove('hidden');
                 this.loadingPage.classList.remove('hidden');
-                
-                await this.loadQuestion();
-                this.loadingPage.classList.add('hidden');
+                try {
+                    await this.loadQuestion();
+                    this.loadingPage.classList.add('hidden');
+                } catch (error) {
+                    console.error('Topic quiz error:', error);
+                    this.showError('Failed to start topic quiz. Please try again.');
+                    this.loadingPage.classList.add('hidden');
+                    this.showStudyPlan(this.currentStudySubject);
+                }
+            }
+
+            async searchWikipedia() {
+                const query = this.wikiSearchInput.value.trim();
+                if (!query) {
+                    this.showError('Please enter a search term');
+                    this.wikiResults.innerHTML = '';
+                    return;
+                }
+
+                // Check cache
+                if (this.wikiCache[query]) {
+                    this.wikiResults.innerHTML = this.wikiCache[query];
+                    return;
+                }
+
+                // Rate limiting
+                const now = Date.now();
+                if (now - this.lastWikiRequestTime < this.minRequestInterval) {
+                    await new Promise(resolve => setTimeout(resolve, this.minRequestInterval - (now - this.lastWikiRequestTime)));
+                }
+                this.lastWikiRequestTime = now;
+
+                this.wikiResults.innerHTML = `
+                    <div class="flex items-center justify-center py-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        <span class="ml-2">Searching Wikipedia...</span>
+                    </div>
+                `;
+
+                try {
+                    const baseUrl = 'https://en.wikipedia.org/api/rest_v1';
+                    const searchUrl = `${baseUrl}/page/search/${encodeURIComponent(query)}?origin=*`;
+                    const searchResponse = await this.fetchWithTimeout(searchUrl, {
+                        headers: { 'User-Agent': 'POSTUTMECBT/1.0 (contact@example.com)' }
+                    }, 10000);
+                    const searchData = await searchResponse.json();
+                    const page = searchData.pages[0];
+                    if (!page) {
+                        this.wikiResults.innerHTML = `
+                            <div class="text-yellow-400 p-4 bg-yellow-900/20 rounded">
+                                <h3 class="font-bold mb-2">No Results</h3>
+                                <p>No Wikipedia articles found for "${query}". Try a different search term.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const summaryUrl = `${baseUrl}/page/summary/${encodeURIComponent(page.title)}?origin=*`;
+                    const summaryResponse = await this.fetchWithTimeout(summaryUrl, {
+                        headers: { 'User-Agent': 'POSTUTMECBT/1.0 (contact@example.com)' }
+                    }, 10000);
+                    const summaryData = await summaryResponse.json();
+
+                    const mediaUrl = `${baseUrl}/page/media/${encodeURIComponent(page.title)}?origin=*`;
+                    const mediaResponse = await this.fetchWithTimeout(mediaUrl, {
+                        headers: { 'User-Agent': 'POSTUTMECBT/1.0 (contact@example.com)' }
+                    }, 10000);
+                    const mediaData = await mediaResponse.json();
+                    const images = mediaData.items?.slice(0, 3).map(item => ({
+                        src: item.srcset?.[0]?.src || item.url || '',
+                        caption: item.caption?.text || 'Image related to ' + page.title
+                    })) || [];
+
+                    const html = `
+                        <h2 class="text-2xl font-bold mb-4">${summaryData.title || 'Untitled'}</h2>
+                        <div class="whitespace-pre-line leading-relaxed text-gray-100">
+                            ${summaryData.extract || 'No summary available.'}
+                        </div>
+                        ${images.length ? `
+                            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                ${images.map(img => `
+                                    <div>
+                                        <img src="${img.src}" alt="${img.caption}" class="w-full h-auto rounded" onerror="this.src='https://via.placeholder.com/200'; this.alt='Image unavailable';">
+                                        <p class="text-sm mt-2">${img.caption}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="mt-4">
+                            <a href="${summaryData.content_urls?.desktop?.page || '#'}"
+                               target="_blank" class="text-blue-400 hover:underline">Read more on Wikipedia</a>
+                        </div>
+                    `;
+                    this.wikiResults.innerHTML = html;
+                    this.wikiCache[query] = html;
+                    this.setLocalStorage('wikiCache', this.wikiCache);
+                } catch (error) {
+                    console.error('Wikipedia search error:', error);
+                    this.wikiResults.innerHTML = `
+                        <div class="text-yellow-400 p-4 bg-yellow-900/20 rounded">
+                            <h3 class="font-bold mb-2">Error</h3>
+                            <p>Unable to fetch Wikipedia data: ${error.message}. Please try again or check your connection.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            showCalculator() {
+                this.calculatorModal.classList.remove('hidden');
+                this.calculatorClear();
+            }
+
+            closeCalculator() {
+                this.calculatorModal.classList.add('hidden');
+            }
+
+            calculatorInput(value) {
+                this.calculatorState.expression += value;
+                this.calculatorDisplay.textContent = this.calculatorState.expression || '0';
+            }
+
+            calculatorClear() {
+                this.calculatorState.expression = '';
+                this.calculatorState.result = 0;
+                this.calculatorDisplay.textContent = '0';
+            }
+
+            calculatorEvaluate() {
+                try {
+                    this.calculatorState.result = eval(this.calculatorState.expression);
+                    this.calculatorDisplay.textContent = this.calculatorState.result;
+                    this.calculatorState.expression = this.calculatorState.result.toString();
+                } catch (error) {
+                    this.calculatorDisplay.textContent = 'Error';
+                    this.calculatorState.expression = '';
+                }
+            }
+
+            calculatorFunction(func) {
+                try {
+                    if (func === 'sqrt') {
+                        const result = Math.sqrt(parseFloat(this.calculatorState.expression));
+                        this.calculatorDisplay.textContent = result;
+                        this.calculatorState.expression = result.toString();
+                    } else if (func === 'pow') {
+                        const result = Math.pow(parseFloat(this.calculatorState.expression), 2);
+                        this.calculatorDisplay.textContent = result;
+                        this.calculatorState.expression = result.toString();
+                    } else if (func === 'sin') {
+                        const result = Math.sin(parseFloat(this.calculatorState.expression) * Math.PI / 180);
+                        this.calculatorDisplay.textContent = result;
+                        this.calculatorState.expression = result.toString();
+                    } else if (func === 'cos') {
+                        const result = Math.cos(parseFloat(this.calculatorState.expression) * Math.PI / 180);
+                        this.calculatorDisplay.textContent = result;
+                        this.calculatorState.expression = result.toString();
+                    } else if (func === 'tan') {
+                        const result = Math.tan(parseFloat(this.calculatorState.expression) * Math.PI / 180);
+                        this.calculatorDisplay.textContent = result;
+                        this.calculatorState.expression = result.toString();
+                    } else if (func === 'quad') {
+                        const coeffs = prompt('Enter coefficients a, b, c for ax² + bx + c = 0 (e.g., 1, -3, 2)').split(',').map(Number);
+                        if (coeffs.length === 3 && coeffs.every(n => !isNaN(n))) {
+                            const [a, b, c] = coeffs;
+                            const discriminant = b * b - 4 * a * c;
+                            if (discriminant < 0) {
+                                this.calculatorDisplay.textContent = 'No real roots';
+                            } else {
+                                const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                                const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                                this.calculatorDisplay.textContent = `Roots: ${root1}, ${root2}`;
+                            }
+                            this.calculatorState.expression = '';
+                        } else {
+                            this.calculatorDisplay.textContent = 'Invalid input';
+                        }
+                    }
+                } catch (error) {
+                    this.calculatorDisplay.textContent = 'Error';
+                    this.calculatorState.expression = '';
+                }
+            }
+
+            async fetchWithTimeout(url, options, timeout = 10000) {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                try {
+                    const response = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(id);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    return response;
+                } catch (error) {
+                    clearTimeout(id);
+                    throw error;
+                }
+            }
+
+            showError(message) {
+                alert(message);
             }
         }
 
-        // Initialize the app
         const app = new QuizApp();
     </script>
 </body>
